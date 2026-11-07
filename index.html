@@ -1,0 +1,1218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Horizon ONE — AI-Native Game Engine Architecture</title>
+  <meta name="description" content="Horizon ONE and Scorpio: High-performance, AI-native game engine technology and autonomous development pipelines." />
+
+  <!-- Preconnect and Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* CSS Reset & Variables */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg-dark: #08090d;
+      --bg-surface: #0e1117;
+      --bg-surface-elevated: #141822;
+      --bg-surface-subtle: #191f2d;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: rgba(56, 189, 248, 0.35);
+      
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+      
+      --accent-cyan: #38bdf8;
+      --accent-cyan-glow: rgba(56, 189, 248, 0.2);
+      --accent-blue: #3b82f6;
+      --accent-emerald: #10b981;
+      --accent-emerald-glow: rgba(16, 185, 129, 0.15);
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-dark);
+      color: var(--text-primary);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body {
+      background: radial-gradient(circle at 50% 0%, #172554 0%, #08090d 50%, #08090d 100%);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Layout Containers */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Header & Navigation */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(8, 9, 13, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 72px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--text-primary);
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue));
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 12px var(--accent-cyan-glow);
+    }
+
+    .brand-logo svg {
+      width: 18px;
+      height: 18px;
+      fill: #000;
+    }
+
+    .brand-title {
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-badge {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      padding: 2px 7px;
+      background: var(--bg-surface-elevated);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-sm);
+      margin-left: 4px;
+    }
+
+    .nav-links {
+      display: none;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    @media (min-width: 768px) {
+      .nav-links {
+        display: flex;
+      }
+    }
+
+    .nav-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--text-primary);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    /* Buttons & Links */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(180deg, #38bdf8 0%, #0284c7 100%);
+      color: #04101e;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 0 16px var(--accent-cyan-glow);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(180deg, #7dd3fc 0%, #0369a1 100%);
+      box-shadow: 0 0 24px rgba(56, 189, 248, 0.4);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface-elevated);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-surface-subtle);
+      border-color: rgba(255, 255, 255, 0.18);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Section */
+    .hero {
+      padding: 7rem 0 5rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 4px 14px;
+      border-radius: var(--radius-full);
+      background: rgba(56, 189, 248, 0.08);
+      border: 1px solid rgba(56, 189, 248, 0.25);
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      margin-bottom: 1.75rem;
+    }
+
+    .hero-eyebrow-dot {
+      width: 7px;
+      height: 7px;
+      background-color: var(--accent-cyan);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--accent-cyan);
+    }
+
+    .hero h1 {
+      font-size: clamp(2.4rem, 5vw, 4.2rem);
+      font-weight: 800;
+      letter-spacing: -0.035em;
+      line-height: 1.1;
+      max-width: 900px;
+      margin: 0 auto 1.5rem;
+      color: #ffffff;
+    }
+
+    .hero h1 span.gradient-text {
+      background: linear-gradient(135deg, #ffffff 40%, #7dd3fc 80%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+      font-size: clamp(1.05rem, 2vw, 1.25rem);
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3.5rem;
+    }
+
+    .spec-strip {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      max-width: 850px;
+      margin: 0 auto;
+      padding: 1.25rem;
+      background: rgba(14, 17, 23, 0.6);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+    }
+
+    @media (min-width: 768px) {
+      .spec-strip {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .spec-item {
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .spec-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+    }
+
+    .spec-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+
+    /* Section Headers */
+    .section-header {
+      text-align: center;
+      max-width: 720px;
+      margin: 0 auto 3.5rem;
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+    }
+
+    .section-title {
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+
+    .section-desc {
+      color: var(--text-secondary);
+      font-size: 1rem;
+    }
+
+    /* Section Component - Architecture (ONE) */
+    .architecture-section {
+      padding: 6rem 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .grid-cards {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .grid-cards {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    .feature-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      transition: border-color 0.2s ease, transform 0.2s ease;
+      position: relative;
+    }
+
+    .feature-card:hover {
+      border-color: var(--border-focus);
+      transform: translateY(-2px);
+    }
+
+    .feature-icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-md);
+      background: var(--bg-surface-elevated);
+      border: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      color: var(--accent-cyan);
+    }
+
+    .feature-icon-box svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* Scorpio Section (AI Agent) */
+    .scorpio-section {
+      padding: 6rem 0;
+      background: linear-gradient(180deg, rgba(8, 9, 13, 0) 0%, rgba(14, 17, 23, 0.7) 50%, rgba(8, 9, 13, 0) 100%);
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .scorpio-card {
+      background: var(--bg-surface);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 900px) {
+      .scorpio-card {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+
+    .scorpio-content {
+      padding: 3rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .scorpio-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--accent-cyan);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+      width: fit-content;
+      margin-bottom: 1.5rem;
+    }
+
+    .scorpio-title {
+      font-size: clamp(1.8rem, 2.5vw, 2.3rem);
+      font-weight: 700;
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .scorpio-desc {
+      color: var(--text-secondary);
+      font-size: 0.98rem;
+      line-height: 1.6;
+      margin-bottom: 2rem;
+    }
+
+    .scorpio-features-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .scorpio-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.92rem;
+      color: var(--text-primary);
+    }
+
+    .scorpio-features-list svg {
+      width: 18px;
+      height: 18px;
+      color: var(--accent-cyan);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .scorpio-terminal {
+      background: #050608;
+      border-left: 1px solid var(--border-subtle);
+      padding: 2rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .terminal-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .terminal-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #334155;
+    }
+
+    .terminal-body {
+      color: #94a3b8;
+      line-height: 1.8;
+    }
+
+    .terminal-code-cyan {
+      color: var(--accent-cyan);
+    }
+
+    .terminal-code-emerald {
+      color: var(--accent-emerald);
+    }
+
+    /* Roadmap Section */
+    .roadmap-section {
+      padding: 6rem 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .roadmap-timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .roadmap-item {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem 2rem;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      align-items: center;
+      position: relative;
+      transition: all 0.2s ease;
+    }
+
+    @media (min-width: 768px) {
+      .roadmap-item {
+        grid-template-columns: 180px 1fr auto;
+      }
+    }
+
+    .roadmap-item.active {
+      background: var(--bg-surface-elevated);
+      border-color: rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.08);
+    }
+
+    .roadmap-stage-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .stage-id {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stage-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 3px 10px;
+      border-radius: var(--radius-full);
+      font-size: 0.75rem;
+      font-weight: 600;
+      width: fit-content;
+    }
+
+    .badge-completed {
+      background: rgba(16, 185, 129, 0.1);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .badge-active {
+      background: rgba(56, 189, 248, 0.12);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+    }
+
+    .badge-upcoming {
+      background: rgba(100, 116, 139, 0.1);
+      color: #94a3b8;
+      border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+
+    .roadmap-stage-details h4 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 0.4rem;
+    }
+
+    .roadmap-stage-details p {
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* Ecosystem Subdomain Section */
+    .ecosystem-section {
+      padding: 6rem 0;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .ecosystem-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    @media (min-width: 640px) {
+      .ecosystem-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (min-width: 1024px) {
+      .ecosystem-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
+    .ecosystem-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 220px;
+      transition: all 0.2s ease;
+    }
+
+    .ecosystem-card:hover {
+      border-color: var(--accent-cyan);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    .eco-top {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .eco-icon {
+      color: var(--accent-cyan);
+      width: 24px;
+      height: 24px;
+    }
+
+    .eco-name {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1.05rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .eco-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .eco-link {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--accent-cyan);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      margin-top: 1.5rem;
+    }
+
+    /* Corporate Footer */
+    footer {
+      border-top: 1px solid var(--border-subtle);
+      padding: 4rem 0 3rem;
+      background-color: #06070a;
+      font-size: 0.88rem;
+      color: var(--text-muted);
+    }
+
+    .footer-top {
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      justify-content: space-between;
+      margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-top {
+        flex-direction: row;
+        align-items: center;
+      }
+    }
+
+    .footer-status {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      background: var(--bg-surface);
+      padding: 6px 14px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-subtle);
+      width: fit-content;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+
+    .footer-bottom {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-bottom {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+      }
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    .footer-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .footer-links a:hover {
+      color: var(--text-secondary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Sticky Navigation -->
+  <header>
+    <div class="container nav-inner">
+      <a href="https://horizon1.us" class="brand">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2L2 19.5h20L12 2zm0 4l6.5 11.5h-13L12 6z"/>
+          </svg>
+        </div>
+        <span class="brand-title">Horizon Neural</span>
+        <span class="brand-badge">ONE</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#about-one">Horizon ONE</a></li>
+        <li><a href="#scorpio">Scorpio AI</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#ecosystem">Ecosystem</a></li>
+        <li><a href="https://docs.horizon1.us">Documentation</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <a href="https://download.horizon1.us" class="btn btn-primary">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"></path>
+          </svg>
+          Get Engine
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          Engine Core v0.8 & Scorpio Pipeline Preview
+        </div>
+
+        <h1>
+          The Next-Generation <br />
+          <span class="gradient-text">AI-Native Game Engine Fork</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Engineered for extreme performance, low-latency agentic inference, and decoupled runtime systems. Purpose-built for modern real-time game development.
+        </p>
+
+        <div class="hero-cta-group">
+          <a href="https://download.horizon1.us" class="btn btn-primary" style="padding: 0.75rem 1.75rem; font-size: 0.95rem;">
+            Download Horizon ONE
+          </a>
+          <a href="https://docs.horizon1.us" class="btn btn-secondary" style="padding: 0.75rem 1.5rem; font-size: 0.95rem;">
+            Read Architecture Docs
+          </a>
+        </div>
+
+        <!-- Metric / Spec Strip -->
+        <div class="spec-strip">
+          <div class="spec-item">
+            <div class="spec-val">C++20</div>
+            <div class="spec-label">Core Runtime</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">&lt; 15ms</div>
+            <div class="spec-label">Scorpio Inference</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">DirectX 12 / VK</div>
+            <div class="spec-label">Target Backends</div>
+          </div>
+          <div class="spec-item">
+            <div class="spec-val">0 Egress</div>
+            <div class="spec-label">CDN Distribution</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Horizon ONE -->
+    <section id="about-one" class="architecture-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Core Engine Architecture</div>
+          <h2 class="section-title">Rebuilt from the Metal for AI Integration</h2>
+          <p class="section-desc">
+            Horizon ONE forks standard industry engine runtimes to eliminate legacy bloat, introducing native memory lanes tailored for concurrent real-time neural network queries.
+          </p>
+        </div>
+
+        <div class="grid-cards">
+          <!-- Card 1 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+              </svg>
+            </div>
+            <h3>Custom C++20 Core Fork</h3>
+            <p>Streamlined memory allocators, isolated thread scheduling, and zero-allocation frame updates optimized strictly for 64-bit multi-core processors.</p>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+              </svg>
+            </div>
+            <h3>Autonomous Inference Bridge</h3>
+            <p>Direct low-overhead hardware bindings to local tensor acceleration and remote Groq LPU inference pipelines without causing main-thread stutter.</p>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 7v10c0 2 1 3 3 3h10c2 0 3-1 3-3V7c0-2-1-3-3-3H7C5 4 4 5 4 7zm4 4h8m-8 4h5"></path>
+              </svg>
+            </div>
+            <h3>Modern Shading Pipeline</h3>
+            <p>Modern compute shader compilation pipelines offering immediate-mode iteration and hot-reloadable HLSL/GLSL asset workflows.</p>
+          </div>
+
+          <!-- Card 4 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+              </svg>
+            </div>
+            <h3>Integrated CLI & Tooling</h3>
+            <p>Full headless orchestration and compilation scripts to build, test, package, and distribute release packages across CI/CD environments seamlessly.</p>
+          </div>
+
+          <!-- Card 5 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+              </svg>
+            </div>
+            <h3>Deterministic State Sync</h3>
+            <p>Strict delta-compression architecture for deterministic multiplayer simulations, telemetry ingestion, and client-side rollback systems.</p>
+          </div>
+
+          <!-- Card 6 -->
+          <div class="feature-card">
+            <div class="feature-icon-box">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 00-9.78 2.096A4.001 4.001 0 003 15z"></path>
+              </svg>
+            </div>
+            <h3>Decoupled Edge CDN</h3>
+            <p>Engine releases, symbol archives, and sample project templates distributed directly via high-throughput edge caches at cdn.horizon1.us.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Scorpio AI -->
+    <section id="scorpio" class="scorpio-section">
+      <div class="container">
+        <div class="scorpio-card">
+          <div class="scorpio-content">
+            <div class="scorpio-badge">Embedded Intelligence</div>
+            <h2 class="scorpio-title">Meet Scorpio AI Agent</h2>
+            <p class="scorpio-desc">
+              Scorpio operates inside the Horizon ONE runtime as an autonomous companion. It understands your scene graph, component bindings, and shader hierarchy to construct game systems in real time.
+            </p>
+
+            <ul class="scorpio-features-list">
+              <li>
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span><strong>Natural Scene Generation:</strong> Synthesize complete level hierarchies, collision meshes, and lighting presets from single prompt specifications.</span>
+              </li>
+              <li>
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span><strong>Live Script Diagnostics:</strong> Scorpio traces runtime logs, predicts null-pointer dereferences, and injects patched code directly into the active editor instance.</span>
+              </li>
+              <li>
+                <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span><strong>Hardware-Accelerated Token Processing:</strong> Integrated directly with ultra-low latency inference microservices to keep your editor responsive.</span>
+              </li>
+            </ul>
+          </div>
+
+          <div class="scorpio-terminal">
+            <div class="terminal-header">
+              <div class="terminal-dot" style="background:#ef4444;"></div>
+              <div class="terminal-dot" style="background:#f59e0b;"></div>
+              <div class="terminal-dot" style="background:#10b981;"></div>
+              <span style="font-size: 0.75rem; color: #475569; margin-left: 8px;">scorpio-daemon — active session</span>
+            </div>
+            <div class="terminal-body">
+              <p>&gt; <span class="terminal-code-cyan">scorpio-agent</span> --bind-context --engine=ONE</p>
+              <p style="color:#64748b;">[OK] Connected to Horizon ONE engine memory pipe</p>
+              <p style="color:#64748b;">[OK] LPU inference socket established (ping: 11ms)</p>
+              <br />
+              <p>&gt; INCOMING INTENT: "Generate post-process bloom & volumetric fog setup"</p>
+              <p style="color:#38bdf8;">[SCORPIO] Parsing engine render graph...</p>
+              <p style="color:#38bdf8;">[SCORPIO] Generating compute shader parameters...</p>
+              <p class="terminal-code-emerald">&gt; Injected 2 nodes into RenderPipeline: VolumetricFogPass.hlsl</p>
+              <p class="terminal-code-emerald">&gt; Scene compilation successful (0 errors, 0 warnings)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Dynamic Roadmap Section -->
+    <section id="roadmap" class="roadmap-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Execution Plan</div>
+          <h2 class="section-title">Development Roadmap</h2>
+          <p class="section-desc">
+            Current trajectory of engine stabilization, agent integration, and public release distribution.
+          </p>
+        </div>
+
+        <div class="roadmap-timeline" id="roadmap-container">
+          <!-- Dynamically populated via JavaScript based on `currentStage` -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Ecosystem Subdomains Section -->
+    <section id="ecosystem" class="ecosystem-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-tag">Network Architecture</div>
+          <h2 class="section-title">Horizon Ecosystem Endpoints</h2>
+          <p class="section-desc">
+            Direct access to official subdomains, documentation endpoints, and distribution infrastructure.
+          </p>
+        </div>
+
+        <div class="ecosystem-grid">
+          <!-- Download Portal -->
+          <a href="https://download.horizon1.us" class="ecosystem-card">
+            <div class="eco-top">
+              <svg class="eco-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+              </svg>
+              <div class="eco-name">
+                Download Center
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"></path>
+                </svg>
+              </div>
+              <p class="eco-desc">Primary release builds, editor installers, and platform runtimes for desktop systems.</p>
+            </div>
+            <div class="eco-link">download.horizon1.us &rarr;</div>
+          </a>
+
+          <!-- CDN Asset Host -->
+          <a href="https://cdn.horizon1.us" class="ecosystem-card">
+            <div class="eco-top">
+              <svg class="eco-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path>
+              </svg>
+              <div class="eco-name">
+                Artifact CDN
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"></path>
+                </svg>
+              </div>
+              <p class="eco-desc">Edge-cached binary distribution, raw symbols, engine sample packs, and dependencies.</p>
+            </div>
+            <div class="eco-link">cdn.horizon1.us &rarr;</div>
+          </a>
+
+          <!-- Docs -->
+          <a href="https://docs.horizon1.us" class="ecosystem-card">
+            <div class="eco-top">
+              <svg class="eco-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+              </svg>
+              <div class="eco-name">
+                Developer Docs
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"></path>
+                </svg>
+              </div>
+              <p class="eco-desc">Full API reference manuals, C++ architecture walkthroughs, and Scorpio integration guides.</p>
+            </div>
+            <div class="eco-link">docs.horizon1.us &rarr;</div>
+          </a>
+
+          <!-- GitHub / Enterprise -->
+          <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="ecosystem-card">
+            <div class="eco-top">
+              <svg class="eco-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+              </svg>
+              <div class="eco-name">
+                Source Repository
+                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path d="M7 17L17 7M17 7H7M17 7V17"></path>
+                </svg>
+              </div>
+              <p class="eco-desc">Continuous integration pipelines, commit registries, and developer issue tracking.</p>
+            </div>
+            <div class="eco-link">github.com &rarr;</div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Corporate Footer -->
+  <footer>
+    <div class="container">
+      <div class="footer-top">
+        <div>
+          <div style="font-weight: 700; color: #fff; font-size: 1.1rem; margin-bottom: 0.25rem;">
+            Horizon Neural Technologies
+          </div>
+          <p style="font-size: 0.85rem; color: #64748b;">
+            Empowering game developers with high-throughput, AI-native runtime architectures.
+          </p>
+        </div>
+
+        <div class="footer-status">
+          <span class="status-indicator"></span>
+          <span>Edge Network Operational &mdash; 99.98% Uptime</span>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>
+          &copy; <span id="year"></span> Horizon Neural Technologies. All rights reserved. Registered on Cloudflare.
+        </div>
+        <ul class="footer-links">
+          <li><a href="https://docs.horizon1.us">Privacy Policy</a></li>
+          <li><a href="https://docs.horizon1.us">Terms of Service</a></li>
+          <li><a href="https://download.horizon1.us">Releases</a></li>
+          <li><a href="https://horizon1.us">Status</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Dynamic Roadmap Loader Script -->
+  <script>
+    // Configuration: Set this integer to move the active stage along the roadmap!
+    // 0 = Stage 0 active, 1 = Stage 1 active, 2 = Stage 2 active, etc.
+    const currentStage = 2;
+
+    const roadmapData = [
+      {
+        stageNumber: "01",
+        title: "Engine Architecture & Fork Foundation",
+        desc: "Complete stripping of obsolete legacy subsystems, establishing C++20 build toolchains, low-overhead custom allocator setups, and clean Vulkan/DirectX 12 initialization."
+      },
+      {
+        stageNumber: "02",
+        title: "Scorpio Assistant & Groq Inference Core",
+        desc: "Embedding high-speed agentic bridges into the main runtime. Achieving sub-20ms roundtrip token queries for live level generation and dynamic shader hot-reloading."
+      },
+      {
+        stageNumber: "03",
+        title: "Windows Editor Binary & Release Distribution",
+        desc: "Packaging the unified desktop editor suite, signing binaries, and deploying stable releases to download.horizon1.us and high-throughput cdn.horizon1.us endpoints."
+      },
+      {
+        stageNumber: "04",
+        title: "Cloud Agent Infrastructure & Multi-User Collab",
+        desc: "Deploying multi-tenant Scorpio agents capable of persistent scene graph coordination, collaborative code compilation, and automated regression testing."
+      }
+    ];
+
+    function renderRoadmap() {
+      const container = document.getElementById("roadmap-container");
+      if (!container) return;
+
+      container.innerHTML = "";
+
+      roadmapData.forEach((item, index) => {
+        const itemEl = document.createElement("div");
+        itemEl.className = "roadmap-item";
+
+        let badgeHtml = "";
+        if (index < currentStage) {
+          badgeHtml = `
+            <span class="stage-badge badge-completed">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path d="M5 13l4 4L19 7"></path>
+              </svg>
+              Completed
+            </span>`;
+        } else if (index === currentStage) {
+          itemEl.classList.add("active");
+          badgeHtml = `
+            <span class="stage-badge badge-active">
+              <span style="width:6px; height:6px; border-radius:50%; background:#38bdf8; box-shadow:0 0 6px #38bdf8;"></span>
+              Active Stage
+            </span>`;
+        } else {
+          badgeHtml = `
+            <span class="stage-badge badge-upcoming">
+              Upcoming
+            </span>`;
+        }
+
+        itemEl.innerHTML = `
+          <div class="roadmap-stage-meta">
+            <span class="stage-id">Phase ${item.stageNumber}</span>
+            ${badgeHtml}
+          </div>
+          <div class="roadmap-stage-details">
+            <h4>${item.title}</h4>
+            <p>${item.desc}</p>
+          </div>
+        `;
+
+        container.appendChild(itemEl);
+      });
+    }
+
+    // Initialize UI
+    window.addEventListener("DOMContentLoaded", () => {
+      renderRoadmap();
+      document.getElementById("year").textContent = new Date().getFullYear();
+    });
+  </script>
+</body>
+</html>
